@@ -2,33 +2,33 @@ package com.example.testapi
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
-import android.util.Log.d
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.testapi.adapter.ApiAdapter
 import com.example.testapi.api.ApiInterface
-import com.example.testapi.databinding.ActivityMainBinding
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 
 class MainActivity : AppCompatActivity() {
     val BASE_URL = "https://jsonplaceholder.typicode.com/"
+
     lateinit var myAdapter: ApiAdapter
-    lateinit var binding: ActivityMainBinding
-     val TAG = this.javaClass.simpleName
+    val TAG = this.javaClass.simpleName
+
+    lateinit var recyclerView: RecyclerView
+    var tempUserList = ArrayList<UserItem>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        binding = ActivityMainBinding.inflate(layoutInflater)
-
-//        val recyclerView = binding.recyclerView
-
-//        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView = findViewById(R.id.recycler_view)
+        recyclerView.layoutManager = LinearLayoutManager(this@MainActivity)
+        recyclerView.setHasFixedSize(true)
 
         val retrofit = Retrofit.Builder()
             .baseUrl(BASE_URL)
@@ -52,30 +52,26 @@ class MainActivity : AppCompatActivity() {
             }
 
         })*/
-        service
-            .getDetails()
-            .enqueue(object : Callback<List<UserItem>> {
-            override fun onResponse(
-                call: Call<List<UserItem>>,
-                response: Response<List<UserItem>>
-            ) {
-                if (response.isSuccessful){
-                    Log.d(TAG,"API response"+ response.body().toString())
-                    myAdapter = ApiAdapter(this@MainActivity, response.body()!!)
-                    binding.recyclerView.adapter = myAdapter
-                    binding.recyclerView.layoutManager = LinearLayoutManager(this@MainActivity)
-                    myAdapter.notifyDataSetChanged()
+        myAdapter = ApiAdapter(this, tempUserList)
+
+        CoroutineScope(Dispatchers.IO).launch {
+            service.getDetails().execute().body()?.let {
+                tempUserList.clear()
+                tempUserList.addAll(it)
+            }
+            withContext(Dispatchers.Main) {
+                if (recyclerView.adapter != null) {
+                    (recyclerView.adapter as ApiAdapter).notifyDataSetChanged()
+                } else {
+                    recyclerView.adapter = myAdapter
                 }
             }
 
-            override fun onFailure(call: Call<List<UserItem>>, t: Throwable) {
-                TODO("Not yet implemented")
-            }
-
-        })
-
+        }
 
     }
+
+
 }
 
 
