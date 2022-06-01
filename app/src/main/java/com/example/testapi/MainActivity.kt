@@ -1,5 +1,6 @@
 package com.example.testapi
 
+import android.annotation.SuppressLint
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,19 +16,24 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 
 class MainActivity : AppCompatActivity() {
-    val BASE_URL = "https://jsonplaceholder.typicode.com/"
+    private val BASE_URL = "https://jsonplaceholder.typicode.com/"
 
-    lateinit var myAdapter: ApiAdapter
-    val TAG = this.javaClass.simpleName
+    private lateinit var myAdapter: ApiAdapter
+    // latent var binding: ActivityMainBinding
 
-    lateinit var recyclerView: RecyclerView
-    var tempUserList = ArrayList<UserItem>()
+    private lateinit var recyclerView: RecyclerView
+    private var tempUserList = ArrayList<UserItem>()
 
+    @SuppressLint("NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        // binding = ActivityMainBinding.inflate(layoutInflater)
         recyclerView = findViewById(R.id.recycler_view)
+
         recyclerView.layoutManager = LinearLayoutManager(this@MainActivity)
+
         recyclerView.setHasFixedSize(true)
 
         val retrofit = Retrofit.Builder()
