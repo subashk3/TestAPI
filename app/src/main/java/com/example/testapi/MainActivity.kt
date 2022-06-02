@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.testapi.adapter.ApiAdapter
 import com.example.testapi.api.ApiInterface
+import com.example.testapi.databinding.ActivityMainBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -16,25 +17,27 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 
 class MainActivity : AppCompatActivity() {
+
     private val BASE_URL = "https://jsonplaceholder.typicode.com/"
 
     private lateinit var myAdapter: ApiAdapter
-    // latent var binding: ActivityMainBinding
 
-    private lateinit var recyclerView: RecyclerView
+    private lateinit var binding: ActivityMainBinding
+
     private var tempUserList = ArrayList<UserItem>()
 
     @SuppressLint("NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
 
-        // binding = ActivityMainBinding.inflate(layoutInflater)
-        recyclerView = findViewById(R.id.recycler_view)
+        binding = ActivityMainBinding.inflate(layoutInflater)
 
-        recyclerView.layoutManager = LinearLayoutManager(this@MainActivity)
+        setContentView(binding.root)
 
-        recyclerView.setHasFixedSize(true)
+
+        binding.recyclerView.layoutManager = LinearLayoutManager(this@MainActivity)
+
+        binding.recyclerView.setHasFixedSize(true)
 
         val retrofit = Retrofit.Builder()
             .baseUrl(BASE_URL)
@@ -58,6 +61,7 @@ class MainActivity : AppCompatActivity() {
             }
 
         })*/
+
         myAdapter = ApiAdapter(this, tempUserList)
 
         CoroutineScope(Dispatchers.IO).launch {
@@ -66,10 +70,10 @@ class MainActivity : AppCompatActivity() {
                 tempUserList.addAll(it)
             }
             withContext(Dispatchers.Main) {
-                if (recyclerView.adapter != null) {
-                    (recyclerView.adapter as ApiAdapter).notifyDataSetChanged()
+                if (binding.recyclerView.adapter != null) {
+                    (binding.recyclerView.adapter as ApiAdapter).notifyDataSetChanged()
                 } else {
-                    recyclerView.adapter = myAdapter
+                    binding.recyclerView.adapter = myAdapter
                 }
             }
 
